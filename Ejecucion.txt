@@ -1,0 +1,74 @@
+Ejecución de Scripts
+
+1. Crear un archivo con la información de las conexiones tal como sigue el formato:
+
+host;basedatos_import;usuario;clave
+host;basedatos_export;usuario;clave
+
+2. Ejecutar script HandlerMigrateData.py:
+
+Ejecucion para la ayuda:
+
+python HandlerMigrateData.py -h
+
+usage: HandlerMigrateData.py [-h] -p PATH_CSV -c CONEXION
+                             [-l LIST_CSV [LIST_CSV ...]] [-r RESUMEN]
+                             [-g FILES_RESUMEN [FILES_RESUMEN ...]]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PATH_CSV, --path_csv PATH_CSV
+                        direcotorio que contiene los archivos csv
+  -c CONEXION, --conexion CONEXION
+                        ruta absoluta mas nombre de archivo que contiene las
+                        configuraciones
+  -l LIST_CSV [LIST_CSV ...], --List_csv LIST_CSV [LIST_CSV ...]
+                        lista de archivos con informacion de macs
+  -r RESUMEN, --resumen RESUMEN
+                        Resumen de informacion a archivo externo <1> si. Por
+                        defecto en archivo LOG
+  -g FILES_RESUMEN [FILES_RESUMEN ...], --Files_Resumen FILES_RESUMEN [FILES_RESUMEN ...]
+                        Archivos de Resumen a descartar. Por defecto no se
+                        descarta ninguno. Archivos Resumenes generados:
+                        UsuariosDosEquipos.csv Estadisticas_Finales.txt
+                        usuarios_vencidos.csv Macs_Eliminadas.csv
+                        List_EquiposConflictivos.txt List_users_Delete.txt
+                        List_Equipos_usuarios_not_File.txt
+
+Ejecucion minima (con parametros minimos)
+
+python HandlerMigrateData.py -p path_to_csv -c ../path_to_FileConfigurationConexction/data_conection.txt 
+
+Ejecucion para volcar informacion a Estadisticas_Finales.txt
+
+python HandlerMigrateData.py -p path_to_csv -c ../path_to_FileConfigurationConexction/data_conection.txt -r 1
+
+Ejecucion para listar algunos csv a considerar:
+
+python HandlerMigrateData.py -p path_to_csv -c ../path_to_FileConfigurationConexction/data_conection.txt -l csv1 csv2 csv3
+
+Script ejecutará todos los pasos:
+
+	1. Obtención de las macs del csv (GetMacs.py)
+	2. Completar información de las tablas no relacionadas (CompleteTables.py)
+	3. Ingresar información de usuarios, equipos y macs (NewInsertTables.py)
+	4. Eliminar y generar archivos con equipos conflictivos (RemoveElementsConflictiv.py)
+	5. Generar Lista de usuarios en base de datos import que no existen en el csv (GenerateListUser.py)
+
+Consideraciones:
+	
+	-Se requiere tener instalado el módulo de python psycopg2
+	-Los scripts deben encontrarse en el mismo directorio (todos)
+	-No eliminar los archivos relacionados a progressbar
+	-Se crea un directorio al mismo nivel que los scripts (FilesOutput) en donde se almacenan todos los archivos
+	de salida de los scripts.
+	-La base de datos a exportar la informacion debe encontrarse vacia y no tener las siguientes vistas creadas:
+
+		->cantidad_equipos_usuarios
+		->equipos_problemas
+		->vista_usuarios_count
+
+	-No debe existir un archivo dentro de los csv llamado total_macs.csv
+	-No debe existir la carpeta FilesOutput
+	-Debe ser usuario root
+	-Toda la informacion de las ejecuciones de los scripts se van al syslog.
